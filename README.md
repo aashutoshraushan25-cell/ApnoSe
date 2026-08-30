@@ -47,18 +47,22 @@
 ## 🚀 शुरुआत कैसे करें (Getting Started)
 
 ### 1. रिपॉजिटरी क्लोन करें
+
 ```bash
 git clone https://github.com/aashutoshraushan25-cell/ApnoSe.git
 cd ApnoSe
 ```
 
 ### 2. पैकेज इंस्टॉल करें
+
 ```bash
 npm install
 ```
 
 ### 3. पर्यावरण चर (.env) कॉन्फ़िगर करें
+
 रूट डायरेक्टरी में `.env` फ़ाइल बनाएं:
+
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/apnose
@@ -67,18 +71,23 @@ MONGO_URI=mongodb://127.0.0.1:27017/apnose
 ### 4. एप्लिकेशन चलाएं
 
 - **Frontend (Vite Dev Server)**:
+
   ```bash
   npm run dev
   ```
+
   ब्राउज़र में खोलें: `http://localhost:5173`
 
 - **Backend (Express + MongoDB Server)**:
+
   ```bash
   npm run server
   ```
+
   बैकएंड पोर्ट: `http://localhost:5000`
 
 - **Production Build**:
+
   ```bash
   npm run build
   ```
@@ -87,7 +96,7 @@ MONGO_URI=mongodb://127.0.0.1:27017/apnose
 
 ## 📂 प्रोजेक्ट संरचना (Project Structure)
 
-```
+```text
 ApnoSe/
 ├── .github/
 │   └── workflows/
