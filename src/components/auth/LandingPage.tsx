@@ -123,12 +123,13 @@ export const LandingPage: React.FC = () => {
       {/* Top Simple Landing Header */}
       <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-800 to-brand-600 p-1.5 shadow-soft border border-purple-300">
-            <img src="/logo.svg" alt="Apno Se" className="w-full h-full object-contain" />
+          <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-soft border border-purple-200">
+            <img src="/logo.svg" alt="ApnoSe" className="w-full h-full object-contain" />
           </div>
           <div>
-            <span className="text-2xl sm:text-3xl font-black font-devanagari bg-gradient-to-r from-brand-900 via-brand-800 to-brand-600 bg-clip-text text-transparent">
-              {t.appName}
+            <span className="text-2xl sm:text-3xl font-black tracking-tight font-sans">
+              <span className="bg-gradient-to-r from-brand-900 to-brand-700 bg-clip-text text-transparent">Apno</span>
+              <span className="bg-gradient-to-r from-saffron-500 to-saffron-600 bg-clip-text text-transparent">Se</span>
             </span>
             <span className="ml-2 text-xs bg-saffron-100 text-saffron-800 font-extrabold px-2.5 py-0.5 rounded-full border border-saffron-300">
               40+
@@ -372,17 +373,20 @@ export const LandingPage: React.FC = () => {
       <footer className="bg-brand-950 text-white py-12 border-t border-brand-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 p-1 flex items-center justify-center">
-              <img src="/logo.svg" alt="Logo" className="w-full h-full object-contain" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/20 p-1 flex items-center justify-center">
+              <img src="/logo.svg" alt="ApnoSe Logo" className="w-full h-full object-contain" />
             </div>
             <div>
-              <span className="text-2xl font-extrabold font-devanagari block">अपनों से (Apno Se)</span>
-              <span className="text-xs text-purple-300 font-medium">"अपने लोगों से जुड़े रहें।"</span>
+              <span className="text-2xl font-black tracking-tight block">
+                <span className="text-white">Apno</span>
+                <span className="text-saffron-400">Se</span>
+              </span>
+              <span className="text-xs text-purple-300 font-medium font-devanagari">"अपने लोगों से जुड़े रहें।"</span>
             </div>
           </div>
 
           <p className="text-sm text-purple-200 font-medium">
-            © 2026 Apno Se. Designed exclusively for 40+ families with love & safety.
+            © 2026 ApnoSe. Designed exclusively for 40+ families with love & safety.
           </p>
 
           <button

@@ -1,36 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
   <defs>
-    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#9333EA" />
-      <stop offset="100%" stop-color="#6B21A8" />
+    <!-- Rich Royal Purple Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#581C87" />
+      <stop offset="50%" stop-color="#7E22CE" />
+      <stop offset="100%" stop-color="#9333EA" />
     </linearGradient>
-    <linearGradient id="warmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F59E0B" />
+
+    <!-- Vibrant Saffron & Rose Gradient -->
+    <linearGradient id="saffronRose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="40%" stop-color="#F59E0B" />
       <stop offset="100%" stop-color="#F43F5E" />
     </linearGradient>
-  </defs>
-  <!-- Background Circle -->
-  <rect width="100" height="100" rx="28" fill="url(#purpleGrad)" />
-  
-  <!-- Heart and Family Connected Hands / Lotus Concept -->
-  <g transform="translate(14, 14)">
-    <!-- Connected outer heart curve -->
-    <path d="M36 62 C36 62, 10 46, 10 26 C10 14, 20 6, 30 10 C34 12, 36 16, 36 16 C36 16, 38 12, 42 10 C52 6, 62 14, 62 26 C62 46, 36 62, 36 62 Z" fill="#FFFFFF" fill-opacity="0.2" />
-    
-    <!-- Warm Inner Emblem - Family Trio Connected -->
-    <!-- Center Parent figure -->
-    <circle cx="36" cy="24" r="7" fill="#FFFFFF" />
-    <path d="M25 46 C25 36, 47 36, 47 46 Z" fill="#FFFFFF" />
-    
-    <!-- Left Member (smaller) -->
-    <circle cx="18" cy="29" r="5" fill="#FDE68A" />
-    <path d="M10 47 C10 39, 26 39, 26 47 Z" fill="#FDE68A" />
-    
-    <!-- Right Member (child / spouse) -->
-    <circle cx="54" cy="29" r="5" fill="#FDE68A" />
-    <path d="M46 47 C46 39, 62 39, 62 47 Z" fill="#FDE68A" />
 
-    <!-- Golden heart core -->
-    <path d="M36 34 C36 34, 30 28, 30 24 C30 21, 33 19, 36 21 C39 19, 42 21, 42 24 C42 28, 36 34, 36 34 Z" fill="url(#warmGrad)" />
+    <!-- Gentle Inner Glow -->
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#3B0764" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle with Subtle Border -->
+  <rect x="4" y="4" width="112" height="112" rx="32" fill="url(#bgGrad)" stroke="#E9D5FF" stroke-width="2" stroke-opacity="0.4" />
+  
+  <!-- Subtle Top Highlight -->
+  <rect x="4" y="4" width="112" height="56" rx="32" fill="url(#glowGrad)" />
+
+  <!-- Central Emblem: Intertwined Golden Heart & Blooming Hands (Symbolizing ApnoSe - Unity & Warmth) -->
+  <g transform="translate(60, 60) scale(1.05)" filter="url(#softShadow)">
+    
+    <!-- Outer Connecting Loving Arc -->
+    <path
+      d="M -32 -6 C -32 -26, -14 -38, 0 -22 C 14 -38, 32 -26, 32 -6 C 32 18, 0 38, 0 38 C 0 38, -32 18, -32 -6 Z"
+      fill="url(#saffronRose)"
+    />
+
+    <!-- Inner Heart White Core -->
+    <path
+      d="M -22 -4 C -22 -18, -10 -26, 0 -14 C 10 -26, 22 -18, 22 -4 C 22 12, 0 28, 0 28 C 0 28, -22 12, -22 -4 Z"
+      fill="#FFFFFF"
+    />
+
+    <!-- Stylized Central Family Flame / Diya / Blossom -->
+    <!-- Center Parent Figure / Diya Light -->
+    <circle cx="0" cy="-6" r="4.5" fill="#F59E0B" />
+    
+    <!-- Left Caring Arm / Petal -->
+    <path
+      d="M -10 10 C -10 0, -2 -2, 0 6 C -4 8, -8 12, -10 10 Z"
+      fill="#7E22CE"
+    />
+
+    <!-- Right Caring Arm / Petal -->
+    <path
+      d="M 10 10 C 10 0, 2 -2, 0 6 C 4 8, 8 12, 10 10 Z"
+      fill="#7E22CE"
+    />
+
+    <!-- Sparkle Blessing at Top -->
+    <path
+      d="M 0 -36 L 2 -30 L 8 -28 L 2 -26 L 0 -20 L -2 -26 L -8 -28 L -2 -30 Z"
+      fill="#FEF3C7"
+    />
   </g>
 </svg>

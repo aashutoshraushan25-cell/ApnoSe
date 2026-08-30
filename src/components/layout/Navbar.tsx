@@ -76,22 +76,23 @@ export const Navbar: React.FC = () => {
           {/* Logo & Brand */}
           <div 
             onClick={() => setActiveTab('home')}
-            className="flex items-center gap-3.5 cursor-pointer group shrink-0"
+            className="flex items-center gap-3 cursor-pointer group shrink-0"
           >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-800 to-brand-600 flex items-center justify-center shadow-soft group-hover:scale-105 transition-transform p-1.5 border border-purple-300">
-              <img src="/logo.svg" alt="Apno Se Logo" className="w-full h-full object-contain" />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl overflow-hidden shadow-soft group-hover:scale-105 transition-transform border border-purple-200">
+              <img src="/logo.svg" alt="ApnoSe Logo" className="w-full h-full object-contain" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-2xl font-extrabold bg-gradient-to-r from-brand-900 via-brand-800 to-brand-600 bg-clip-text text-transparent font-devanagari">
-                  {t.appName}
+              <div className="flex items-center gap-1.5 leading-none">
+                <span className="text-2xl sm:text-[26px] font-black tracking-tight font-sans">
+                  <span className="bg-gradient-to-r from-brand-900 to-brand-700 bg-clip-text text-transparent">Apno</span>
+                  <span className="bg-gradient-to-r from-saffron-500 to-saffron-600 bg-clip-text text-transparent">Se</span>
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-saffron-100 text-saffron-800 font-bold border border-saffron-200">
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-saffron-100 text-saffron-800 font-extrabold border border-saffron-200 shadow-2xs">
                   40+
                 </span>
               </div>
-              <p className="text-xs text-warm-500 font-medium hidden sm:block">
-                {t.tagline}
+              <p className="text-[11px] text-warm-500 font-bold mt-0.5 hidden sm:block font-devanagari">
+                अपनों से जुड़ें • दिल से बात करें
               </p>
             </div>
           </div>
