@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApp } from '../../context/AppContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -17,17 +17,58 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   MessageSquare,
+  Camera,
+  Upload,
 } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { t } = useLanguage();
-  const { currentUser } = useAuth();
-  const { posts, familyMembers, communities, setActiveTab } = useApp();
+  const { currentUser, updateCurrentUser } = useAuth();
+  const { posts, familyMembers, communities, setActiveTab, showToast } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'posts' | 'photos' | 'saved' | 'communities'>('posts');
   const [isEditOpen, setIsEditOpen] = useState(false);
 
+  const directAvatarInputRef = useRef<HTMLInputElement>(null);
+  const directCoverInputRef = useRef<HTMLInputElement>(null);
+
   if (!currentUser) return null;
+
+  // Handle instant photo upload from device
+  const handleDirectAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('कृपया केवल फोटो फ़ाइल चुनें।');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateCurrentUser({ avatar: reader.result });
+        showToast('आपकी प्रोफ़ाइल फ़ोटो सफलतापूर्वक अपडेट हो गई! 🌸');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Handle instant cover photo upload from device
+  const handleDirectCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      showToast('कृपया केवल फोटो फ़ाइल चुनें।');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        updateCurrentUser({ coverImage: reader.result });
+        showToast('कवर फ़ोटो सफलतापूर्वक अपडेट हो गई! 🌸');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const userPosts = posts.filter((p) => p.authorId === currentUser.id);
   const savedPosts = posts.filter((p) => p.savedByMe);
@@ -39,33 +80,67 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="space-y-6 animate-in fade-in pb-12">
       
+      {/* Hidden Device File Inputs */}
+      <input
+        type="file"
+        ref={directAvatarInputRef}
+        accept="image/*"
+        className="hidden"
+        onChange={handleDirectAvatarUpload}
+      />
+      <input
+        type="file"
+        ref={directCoverInputRef}
+        accept="image/*"
+        className="hidden"
+        onChange={handleDirectCoverUpload}
+      />
+
       {/* Profile Header Container */}
       <div className="bg-white rounded-3xl shadow-soft border border-warm-200/80 overflow-hidden">
         
         {/* Cover Photo */}
-        <div className="relative h-48 sm:h-64 w-full bg-gradient-to-r from-purple-900 via-brand-800 to-indigo-900">
+        <div className="relative h-48 sm:h-64 w-full bg-gradient-to-r from-purple-900 via-brand-800 to-indigo-900 group/cover">
           <img
             src={currentUser.coverImage}
             alt="Cover"
             className="w-full h-full object-cover opacity-85"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          
+          {/* Change Cover Photo Button */}
+          <button
+            type="button"
+            onClick={() => directCoverInputRef.current?.click()}
+            className="absolute top-4 right-4 flex items-center gap-1.5 px-3.5 py-2 bg-black/50 hover:bg-black/75 text-white font-extrabold text-xs rounded-2xl backdrop-blur-md border border-white/20 transition-all shadow-md active:scale-95"
+            title="डिवाइस से कवर फ़ोटो बदलें"
+          >
+            <Camera className="w-4 h-4 text-saffron-300" />
+            <span>कवर फ़ोटो बदलें</span>
+          </button>
         </div>
 
         {/* Profile Info Row */}
         <div className="px-6 pb-6 pt-0 relative">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-4">
             
-            {/* Avatar */}
-            <div className="relative inline-block">
+            {/* Avatar with Camera Upload Badge */}
+            <div className="relative inline-block group/avatar">
               <img
                 src={currentUser.avatar}
                 alt={currentUser.name}
-                className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white shadow-soft-xl"
+                className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-white shadow-soft-xl group-hover/avatar:brightness-95 transition-all"
               />
-              <span className="absolute bottom-2 right-2 p-1.5 bg-brand-600 text-white rounded-full border-2 border-white shadow-sm" title="सत्यापित 40+ सदस्य">
-                <CheckCircle2 className="w-5 h-5" />
-              </span>
+              
+              {/* Direct Camera Upload Button on Avatar */}
+              <button
+                type="button"
+                onClick={() => directAvatarInputRef.current?.click()}
+                className="absolute bottom-1 right-1 p-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-full border-2 border-white shadow-md transition-transform active:scale-90 hover:scale-105 flex items-center justify-center"
+                title="डिवाइस से नई फ़ोटो चुनें"
+              >
+                <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
             </div>
 
             {/* Edit & Settings Action Buttons */}
