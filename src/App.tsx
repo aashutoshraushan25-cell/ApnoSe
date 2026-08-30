@@ -69,13 +69,10 @@ export const MainAppContent: React.FC = () => {
       <Navbar />
 
       {/* Main Container Layout */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 flex gap-6 pt-4 sm:pt-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full flex-1 flex justify-center pt-4 sm:pt-6">
         
-        {/* Left Desktop Sidebar */}
-        <Sidebar />
-
         {/* Dynamic Center Main Content Area */}
-        <main className={`flex-1 min-w-0 transition-all duration-300 ${activeTab === 'messages' ? 'max-w-5xl lg:max-w-6xl' : 'max-w-3xl'}`}>
+        <main className={`w-full min-w-0 transition-all duration-300 ${activeTab === 'messages' ? 'max-w-6xl' : 'max-w-4xl'}`}>
           
           {/* TAB 1: HOME FEED */}
           {activeTab === 'home' && (

@@ -16,13 +16,23 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
+  Home,
+  HeartHandshake,
+  Users,
+  MessageCircle,
+  FolderHeart,
+  Cake,
+  User,
+  Settings,
+  PlusCircle,
 } from 'lucide-react';
+import { ActiveTab } from '../../types';
 
 export const Navbar: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   const { textSize, cycleTextSize, highContrast, toggleHighContrast, soundEnabled, setSoundEnabled } = useAccessibility();
   const { currentUser, availableUsers, switchUser, logout } = useAuth();
-  const { setActiveTab, unreadNotifCount, searchQuery, setSearchQuery } = useApp();
+  const { activeTab, setActiveTab, unreadNotifCount, searchQuery, setSearchQuery, conversations, setIsCreatePostOpen } = useApp();
 
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -42,6 +52,21 @@ export const Navbar: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const unreadMessagesCount = conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+
+  const navTabs: { id: ActiveTab; label: string; icon: React.FC<{ className?: string }>; badge?: number }[] = [
+    { id: 'home', label: t.home, icon: Home },
+    { id: 'family', label: t.family, icon: HeartHandshake },
+    { id: 'friends', label: t.friends, icon: Users },
+    { id: 'messages', label: t.messages, icon: MessageCircle, badge: unreadMessagesCount },
+    { id: 'communities', label: t.communities, icon: FolderHeart },
+    { id: 'birthdays', label: 'जन्मदिन व उत्सव', icon: Cake },
+    { id: 'safety', label: t.safety, icon: ShieldCheck },
+    { id: 'notifications', label: t.notifications, icon: Bell, badge: unreadNotifCount },
+    { id: 'profile', label: t.profile, icon: User },
+    { id: 'settings', label: t.settings, icon: Settings },
+  ];
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-warm-200 shadow-sm">
@@ -292,6 +317,50 @@ export const Navbar: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Top Horizontal Navigation Menu Bar */}
+      <div className="border-t border-warm-200/80 bg-warm-50/70 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 flex items-center justify-between gap-2 overflow-x-auto scrollbar-none py-1.5">
+          <nav className="flex items-center gap-1 sm:gap-1.5 min-w-max">
+            {navTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-3 sm:px-3.5 py-2 rounded-2xl font-bold text-sm sm:text-[15px] transition-all relative shrink-0 ${
+                    isActive
+                      ? 'bg-brand-700 text-white shadow-soft font-extrabold scale-[1.02]'
+                      : 'text-warm-700 hover:bg-warm-200/80 hover:text-warm-900'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${isActive ? 'text-white' : 'text-brand-700'}`} />
+                  <span className="font-devanagari">{tab.label}</span>
+                  {tab.badge && tab.badge > 0 ? (
+                    <span
+                      className={`text-[11px] font-extrabold px-1.5 py-0.2 rounded-full shadow-xs ${
+                        isActive ? 'bg-coral-400 text-white' : 'bg-coral-500 text-white animate-pulse'
+                      }`}
+                    >
+                      {tab.badge}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Prominent Create Post Button in Top Menu */}
+          <button
+            onClick={() => setIsCreatePostOpen(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-800 to-brand-600 hover:from-brand-900 hover:to-brand-700 text-white rounded-2xl font-extrabold text-sm shadow-sm hover:shadow-md transition-all shrink-0 ml-2"
+          >
+            <PlusCircle className="w-4 h-4 text-saffron-300" />
+            <span>{t.createPost}</span>
+          </button>
         </div>
       </div>
     </header>
