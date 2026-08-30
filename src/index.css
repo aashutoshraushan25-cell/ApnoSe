@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --app-font-scale: 1.1; /* 10% larger by default for 40+ */
+    --brand-primary: #7e22ce;
+  }
+
+  html {
+    font-size: 17px;
+  }
+
+  html.text-size-normal {
+    font-size: 15px;
+  }
+
+  html.text-size-large {
+    font-size: 17.5px;
+  }
+
+  html.text-size-extralarge {
+    font-size: 20.5px;
+  }
+
+  body {
+    @apply bg-warm-50 text-warm-900 font-sans;
+    background-image: radial-gradient(#e9d5ff 0.75px, transparent 0.75px);
+    background-size: 24px 24px;
+    background-color: #faf7f2;
+  }
+
+  /* High contrast styling for maximum clarity */
+  html.high-contrast {
+    filter: contrast(1.15);
+  }
+
+  html.high-contrast body {
+    background-color: #f5f0e8;
+    color: #000000;
+  }
+
+  html.high-contrast .bg-white {
+    background-color: #ffffff !important;
+    border-color: #4b5563 !important;
+    box-shadow: 0 0 0 1px #374151 !important;
+  }
+
+  html.high-contrast button {
+    border-width: 2px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Accessible focus indicators */
+  *:focus-visible {
+    @apply outline-none ring-4 ring-brand-500/50 ring-offset-2 ring-offset-warm-50;
+  }
+}
+
+/* Custom friendly scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3e8ff;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c084fc;
+  border-radius: 10px;
+  border: 2px solid #f3e8ff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9333ea;
+}
+
+/* Audio waveform animated bars */
+@keyframes wave-animation {
+  0%, 100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-wave {
+  animation: wave-animation 1.2s ease-in-out infinite;
+}
+
+/* Big button touch feedback */
+.touch-target-large {
+  min-height: 48px;
+  min-width: 48px;
+}
