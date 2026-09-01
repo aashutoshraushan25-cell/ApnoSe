@@ -16,8 +16,7 @@
     "backend:start": "npm --prefix backend run start",
     "backend:seed": "npm --prefix backend run seed",
     "seed": "npm --prefix backend run seed",
-    "test": "npm --prefix backend test",
-    "start": "npm --prefix backend run start"
+    "test": "npm --prefix backend test"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
