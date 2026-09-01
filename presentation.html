@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApnoSe (अपनों से) — Official Presentation Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Noto+Sans+Devanagari:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0f141c;
+      --card-bg: #1a2230;
+      --card-border: #2a364a;
+      --primary: #f59e0b;
+      --primary-light: #fef3c7;
+      --accent: #10b981;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Top Navigation Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      background: rgba(26, 34, 48, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .badge {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .slide-progress {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    /* Presentation Canvas */
+    .deck-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      max-width: 1100px;
+      height: 82vh;
+      max-height: 640px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 28px;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(60px) scale(0.96);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0) scale(1);
+    }
+
+    /* Slide Titles & Typography */
+    .slide-tag {
+      color: var(--primary);
+      text-transform: uppercase;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #fcd34d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: #ffffff;
+    }
+
+    p.subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    /* Cards Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .feature-card {
+      background: rgba(15, 20, 28, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .feature-card .icon {
+      font-size: 28px;
+      margin-bottom: 4px;
+    }
+
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .highlight-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .badge-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Bottom Toolbar */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      background: rgba(26, 34, 48, 0.8);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--card-border);
+      z-index: 10;
+    }
+
+    .btn-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button.nav-btn {
+      background: var(--card-border);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    button.nav-btn:hover {
+      background: var(--primary);
+      color: #000000;
+    }
+
+    button.nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Code & Architecture block */
+    pre.code-block {
+      background: #090d13;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      overflow-x: auto;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <span>🌸 ApnoSe</span>
+      <span class="badge">40+ Senior Social Platform</span>
+    </div>
+    <div class="slide-progress" id="slideIndicator">Slide 1 / 11</div>
+  </header>
+
+  <!-- PRESENTATION CONTAINER -->
+  <main class="deck-container">
+
+    <!-- SLIDE 1: Title -->
+    <section class="slide active">
+      <div class="slide-tag">PROJECT PRESENTATION • 2026</div>
+      <h1>🌸 ApnoSe (अपनों से)</h1>
+      <p class="subtitle">भारत का पहला वरिष्ठ-प्रथम (40+ Only) पारिवारिक, सुरक्षित एवं सांस्कृतिक सोशल नेटवर्क</p>
+      
+      <div class="grid-4">
+        <div class="feature-card">
+          <div class="icon">👨‍👩‍👧‍👦</div>
+          <h3>100% Family First</h3>
+          <p>परिवार व पुराने मित्रों से बिना शोर-शराबे के निजी जुड़ाव।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎂</div>
+          <h3>40+ Age Restriction</h3>
+          <p>जन्मतिथि से लाइव आयु जांच — 40 से कम आयु पर पूर्ण रोक।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔐</div>
+          <h3>Zero-Knowledge</h3>
+          <p>डिवाइस-लेवल 256-bit AES एन्क्रिप्शन गोपनीयता।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">👵</div>
+          <h3>Accessible UI</h3>
+          <p>बड़े फॉन्ट, वॉयस नरेशन और 1-टच वीडियो कॉल्स।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Problem Statement -->
+    <section class="slide">
+      <div class="slide-tag">THE PROBLEM</div>
+      <h2>वर्तमान सोशल मीडिया में वरिष्ठों की चुनौतियाँ</h2>
+      <p class="subtitle">आधुनिक डिजिटल प्लेटफॉर्म्स बुजुर्गों के लिए तनाव, भ्रम और जोखिम पैदा करते हैं:</p>
+
+      <div class="grid-2">
+        <div class="feature-card">
+          <div class="icon">📱</div>
+          <h3>1. जटिल व भ्रामक यूजर इंटरफ़ेस</h3>
+          <p>छोटे अक्षर, छिपे हुए मेनू और अनचाहे विज्ञापनों से बुजुर्गों को संचालन में भारी कठिनाई होती है।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚠️</div>
+          <h3>2. साइबर फ्रॉड व स्कैम का खतरा</h3>
+          <p>पेंशन, डिजिटल अरेस्ट, फेक लॉटरी और OTP फ्रॉड के निशाने पर अक्सर वरिष्ठ नागरिक होते हैं।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔓</div>
+          <h3>3. डेटा प्राइवेसी का हनन</h3>
+          <p>पारिवारिक तस्वीरें और मेडिकल रिकॉर्ड्स ट्रैक होकर विज्ञापनों के लिए बेच दिए जाते हैं।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌪️</div>
+          <h3>4. युवा-केंद्रित टॉक्सिक कंटेंट</h3>
+          <p>एल्गोरिदम्स सिर्फ सनसनीखेज और तनावपूर्ण कंटेंट दिखाते हैं, जिससे मानसिक शांति भंग होती है।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: The Solution -->
+    <section class="slide">
+      <div class="slide-tag">THE SOLUTION</div>
+      <h2>ApnoSe: वरिष्ठों के लिए डिजिटल शांति निकेतन</h2>
+      <p class="subtitle">एक ऐसा सुरक्षित वातावरण जो विशेष रूप से 40+ नागरिकों की जरूरतों के अनुरूप गढ़ा गया है:</p>
+
+      <div class="grid-3">
+        <div class="feature-card">
+          <div class="icon">🛡️</div>
+          <h3>सख्त 40+ आयु द्वार</h3>
+          <p>जन्मतिथि से लाइव आयु की गणना। 40 वर्ष से कम आयु वाले नया खाता नहीं बना सकते।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">👨‍👩‍👧‍👦</div>
+          <h3>पारिवारिक वंशावली</h3>
+          <p>दादा, दादी, बेटा, बेटी आदि रिश्तों के साथ केवल परिवार में साझा होने वाली पोस्ट्स।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔊</div>
+          <h3>1-क्लिक वॉयस नरेशन</h3>
+          <p>बिना चश्मा लगाए किसी भी पोस्ट और संदेश को अपनी भाषा में बोलकर सुनने की सुविधा।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Core Features -->
+    <section class="slide">
+      <div class="slide-tag">CORE CAPABILITIES</div>
+      <h2>प्लेटफॉर्म के 5 मुख्य तकनीकी स्तंभ</h2>
+      
+      <div class="grid-2" style="margin-top: 16px;">
+        <div class="feature-card">
+          <h3>🎂 1. जन्म तिथि व स्वतः आयु गणना</h3>
+          <p>दिन, माह, वर्ष चयन से आयु की सटीक गणना। 40 वर्ष से कम होने पर पंजीकरण बटन स्वतः निष्क्रिय।</p>
+        </div>
+        <div class="feature-card">
+          <h3>🔐 2. 8+ मिश्रित पासवर्ड सुरक्षा नीति</h3>
+          <p>अक्षर (A-Z/a-z), अंक (0-9) और विशेष चिह्न (@#$) का अनिवार्य मिश्रण + लाइव स्ट्रेंथ बार।</p>
+        </div>
+        <div class="feature-card">
+          <h3>🛡️ 3. शून्य-ज्ञान डेटा एन्क्रिप्शन</h3>
+          <p>Web Crypto API द्वारा 256-bit AES एन्क्रिप्शन। सर्वर डेटाबेस भी डेटा नहीं पढ़ सकता।</p>
+        </div>
+        <div class="feature-card">
+          <h3>⚡ 4. रियल-टाइम Socket.IO चैट व कॉलिंग</h3>
+          <p>लाइव टाइपिंग, इंस्टेंट मैसेजिंग और 1-टच डायरेक्ट ऑडियो/वीडियो कॉलिंग।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Full-Stack Architecture -->
+    <section class="slide">
+      <div class="slide-tag">ARCHITECTURE</div>
+      <h2>फुल-स्टैक हाइब्रिड सिस्टम आर्किटेक्चर</h2>
+      
+      <pre class="code-block">
+[React 18 + Vite 6 + Tailwind CSS] ──(Web Crypto AES-GCM)──> [Client Security]
+       │                                                               │
+       ├─ REST API (JSON) ──> [Express + Node.js] ──> [MongoDB Multi-Model]
+       │                             │
+       └─ WebSockets (Socket.IO) ────┴─> [Live Chat, Alerts & Video Signaling]
+      </pre>
+
+      <div class="grid-3" style="margin-top: 14px;">
+        <div class="feature-card">
+          <h3>Frontend</h3>
+          <p>React 18, Vite 6, TypeScript, Lucide Icons, Web Speech API.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Backend API</h3>
+          <p>Node.js, Express, Zod Middleware, Rate Limiting, JWT Auth.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Real-Time & DB</h3>
+          <p>Socket.IO Server Gateway, MongoDB Multi-Model Schemas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: Security & Zero-Knowledge Privacy -->
+    <section class="slide">
+      <div class="slide-tag">SECURITY & PRIVACY</div>
+      <h2>शून्य-ज्ञान एन्क्रिप्शन व बहुस्तरीय सुरक्षा</h2>
+      
+      <div class="grid-3" style="margin-top: 16px;">
+        <div class="feature-card">
+          <div class="icon">🔑</div>
+          <h3>Client-Side Encryption</h3>
+          <p>निजी यादें और मेडिकल पर्चियां उपयोगकर्ता की डिवाइस पर ही एन्क्रिप्ट होकर सर्वर पर जाती हैं।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🛡️</div>
+          <h3>Rate Limiting & DDOS</h3>
+          <p>प्रति IP अनुरोध सीमा नियंत्रण द्वारा ब्रूट-फ़ोर्स पासवर्ड हमलों से पूर्ण सुरक्षा।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🚨</div>
+          <h3>Senior Scam Shield</h3>
+          <p>पेंशन व डिजिटल अरेस्ट फ्रॉड से बचाने के लिए 1-क्लिक साइबर सुरक्षा रिपोर्टिंग।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: Database Schemas -->
+    <section class="slide">
+      <div class="slide-tag">DATABASE DESIGN</div>
+      <h2>मॉड्यूलर डेटाबेस संग्रह (MongoDB Collections)</h2>
+      
+      <div class="grid-4" style="margin-top: 16px;">
+        <div class="feature-card">
+          <h3>👤 users</h3>
+          <p>प्रोफ़ाइल, जन्मतिथि, आयु, भाषा, पासवर्ड हैश।</p>
+        </div>
+        <div class="feature-card">
+          <h3>📝 posts</h3>
+          <p>पारिवारिक यादें, मीडिया, विजिबिलिटी परमिशन।</p>
+        </div>
+        <div class="feature-card">
+          <h3>💬 messages</h3>
+          <p>1-ऑन-1 चैट, एन्क्रिप्टेड संदेश, रीड स्टेटस।</p>
+        </div>
+        <div class="feature-card">
+          <h3>👨‍👩‍👧 family</h3>
+          <p>रिश्ते, दादा-दादी, नाना-नानी वंशावली लिंक।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Accessibility Ergonomics -->
+    <section class="slide">
+      <div class="slide-tag">SENIOR ERGONOMICS</div>
+      <h2>सुलभता व सहज संचालन (Accessibility First)</h2>
+      
+      <div class="grid-3" style="margin-top: 16px;">
+        <div class="feature-card">
+          <div class="icon">🔍</div>
+          <h3>3-स्तरीय टेक्स्ट स्केलिंग</h3>
+          <p>सामान्य, बड़ा, और विशालकाय फॉन्ट साइज — चश्मे के बिना भी स्पष्ट पढ़ाई।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌗</div>
+          <h3>हाई-कंट्रास्ट डार्क थीम</h3>
+          <p>आँखों की सुरक्षा के लिए उच्च कंट्रास्ट डार्क व गोल्ड थीम विकल्प।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🇮🇳</div>
+          <h3>6+ क्षेत्रीय भाषाएं</h3>
+          <p>हिंदी, अंग्रेजी, भोजपुरी, मैथिली, बांग्ला और मराठी में सहज उपलब्धता।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: Testing & Quality Assurance -->
+    <section class="slide">
+      <div class="slide-tag">TESTING & VERIFICATION</div>
+      <h2>100% टेस्ट पास दर व स्वचालित सत्यापन</h2>
+      
+      <div class="grid-3" style="margin-top: 16px;">
+        <div class="feature-card">
+          <span class="highlight-badge badge-green">✓ 8/8 Tests Passed</span>
+          <h3>Jest Test Suite</h3>
+          <p>40+ Age Restriction, 8+ Mixed Password, Feed & Report APIs Passed.</p>
+        </div>
+        <div class="feature-card">
+          <span class="highlight-badge badge-green">✓ 0 Errors</span>
+          <h3>TypeScript Compiler</h3>
+          <p>Frontend & Backend strict type checking exited with Code 0.</p>
+        </div>
+        <div class="feature-card">
+          <span class="highlight-badge badge-green">✓ 1667 Modules</span>
+          <h3>Production Build</h3>
+          <p>Vite production bundle compiled and ready for live deployment.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: Future Roadmap -->
+    <section class="slide">
+      <div class="slide-tag">ROADMAP</div>
+      <h2>भविष्य की योजनाएं व नवाचार</h2>
+      
+      <div class="grid-2" style="margin-top: 16px;">
+        <div class="feature-card">
+          <div class="icon">🎙️</div>
+          <h3>1. AI Voice Assistant (सुमन दीदी)</h3>
+          <p>वरिष्ठों के लिए बोलकर ऐप चलाने, याद दिलाने और हालचाल पूछने वाला एआई मित्र।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">💊</div>
+          <h3>2. मेडिसिन व हेल्थ ट्रैकर</h3>
+          <p>दवाइयों का समय पर रिमाइंडर और डॉक्टर की पर्चियों का सुरक्षित डिजिटल लॉकर।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🪔</div>
+          <h3>3. लाइव सत्संग व भजन संध्या</h3>
+          <p>वरिष्ठ नागरिकों के लिए दैनिक लाइव आध्यात्मिक एवं योग वेबिनार।</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📲</div>
+          <h3>4. नेटिव एंड्रॉइड व आईओएस ऐप</h3>
+          <p>1-टच इमरजेंसी पैनिक बटन और होमस्क्रीन विजेट्स।</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 11: Conclusion -->
+    <section class="slide">
+      <div class="slide-tag">CONCLUSION</div>
+      <h1>धन्यवाद! (Thank You) 🌸</h1>
+      <p class="subtitle">"ApnoSe — अपनों से जुड़ाव, बिना किसी तनाव"</p>
+      
+      <div class="feature-card" style="margin-top: 20px; text-align: center; align-items: center;">
+        <p style="font-size: 16px; color: #ffffff; font-weight: 700;">
+          🔗 GitHub: <strong>https://github.com/aashutoshraushan25-cell/ApnoSe.git</strong>
+        </p>
+        <p style="font-size: 14px; color: var(--primary); margin-top: 6px;">
+          🚀 Live Development URL: <strong>http://localhost:5173</strong>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER CONTROLS -->
+  <footer>
+    <div class="slide-progress">कीबोर्ड तीर कुंजी (← / →) या बटनों का उपयोग करें</div>
+    <div class="btn-group">
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">◀ पिछला (Prev)</button>
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">अगला (Next) ▶</button>
+      <button class="nav-btn" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const indicator = document.getElementById('slideIndicator');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlide() {
+      slides.forEach((s, idx) => {
+        s.classList.toggle('active', idx === currentSlide);
+      });
+      indicator.textContent = `Slide ${currentSlide + 1} / ${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function changeSlide(direction) {
+      currentSlide = Math.max(0, Math.min(totalSlides - 1, currentSlide + direction));
+      updateSlide();
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft') {
+        changeSlide(-1);
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>
