@@ -118,7 +118,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Connect live Socket.IO
         socketService.connect(res.data.accessToken);
         return { success: true };
-      } else if (res.message) {
+      } else if (
+        res.message &&
+        res.error?.code !== 'NETWORK_ERROR' &&
+        !res.message.toLowerCase().includes('failed to fetch') &&
+        !res.message.toLowerCase().includes('network') &&
+        !res.message.includes('नेटवर्क')
+      ) {
         return { success: false, message: res.message };
       }
     } catch {
@@ -226,7 +232,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentUser(mappedUser);
         socketService.connect(res.data.accessToken);
         return { success: true };
-      } else if (res.message) {
+      } else if (
+        res.message &&
+        res.error?.code !== 'NETWORK_ERROR' &&
+        !res.message.toLowerCase().includes('failed to fetch') &&
+        !res.message.toLowerCase().includes('network') &&
+        !res.message.includes('नेटवर्क')
+      ) {
         return { success: false, message: res.message };
       }
     } catch {
