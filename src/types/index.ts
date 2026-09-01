@@ -15,6 +15,7 @@ export interface User {
   age: number;
   mobile: string;
   email: string;
+  password?: string;
   avatar: string;
   coverImage: string;
   location: string;
@@ -24,6 +25,20 @@ export interface User {
   occupation?: string;
   isVerified?: boolean;
   interests: string[];
+  privacyAgreed?: boolean;
+  encryptionEnabled?: boolean;
+  encryptionPin?: string;
+}
+
+export interface VaultItem {
+  id: string;
+  userId: string;
+  title: string;
+  category: 'medical' | 'financial' | 'memoir' | 'id_cards' | 'contacts';
+  encryptedContent: string;
+  plainContentPreview?: string; // only visible when unlocked locally
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FamilyMember {

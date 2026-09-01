@@ -25,11 +25,18 @@ dist-ssr
 
 # Environment variables
 .env
+.env*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
+backend/.env*
+!backend/.env.example
 
 # Snapshots & cache
 .snapshots
 .vite
+backend/node_modules
+backend/dist
+backend/uploads

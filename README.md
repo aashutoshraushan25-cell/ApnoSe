@@ -70,7 +70,13 @@ MONGO_URI=mongodb://127.0.0.1:27017/apnose
 
 ### 4. एप्लिकेशन चलाएं
 
-- **Frontend (Vite Dev Server)**:
+- **Full-Stack (Frontend + Backend दोनों एक साथ)**:
+
+  ```bash
+  npm run dev:all
+  ```
+
+- **केवल Frontend (Vite Dev Server)**:
 
   ```bash
   npm run dev
@@ -78,18 +84,31 @@ MONGO_URI=mongodb://127.0.0.1:27017/apnose
 
   ब्राउज़र में खोलें: `http://localhost:5173`
 
-- **Backend (Express + MongoDB Server)**:
+- **केवल Backend (Modular REST API + Real-Time Socket.IO Server)**:
 
   ```bash
-  npm run server
+  npm run backend:dev
   ```
 
-  बैकएंड पोर्ट: `http://localhost:5000`
+  बैकएंड पोर्ट: `http://localhost:5000` (API: `/api/v1`)
+
+- **डेटाबेस में डेमो डेटा सीड करें (Seed Database)**:
+
+  ```bash
+  npm run seed
+  ```
+
+- **टेस्ट सूट चलाएं (Run Tests)**:
+
+  ```bash
+  npm test
+  ```
 
 - **Production Build**:
 
   ```bash
   npm run build
+  npm run backend:build
   ```
 
 ---

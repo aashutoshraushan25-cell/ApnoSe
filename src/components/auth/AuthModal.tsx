@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage, LANGUAGE_OPTIONS } from '../../context/LanguageContext';
 import { Language } from '../../types';
@@ -15,7 +15,13 @@ import {
   AlertCircle,
   Globe,
   ArrowRight,
+  Camera,
+  Upload,
+  Trash2,
+  Check,
 } from 'lucide-react';
+
+import { compressImage } from '../../utils/imageCompression';
 
 interface AuthModalProps {
   initialMode?: 'login' | 'register';
@@ -51,8 +57,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [regLocation, setRegLocation] = useState('नई दिल्ली');
   const [regLang, setRegLang] = useState<Language>(language);
   const [regAvatar, setRegAvatar] = useState(PRESET_REGISTER_AVATARS[0]);
+  const [customAvatarUploaded, setCustomAvatarUploaded] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressed = await compressImage(file, 450, 0.85);
+        setRegAvatar(compressed);
+        setCustomAvatarUploaded(true);
+        setErrorMsg(null);
+      } catch (err: any) {
+        setErrorMsg(err.message || 'फ़ोटो लोड करने में विफल');
+      }
+    }
+  };
+
+  const handleRemoveCustomAvatar = () => {
+    setCustomAvatarUploaded(false);
+    setRegAvatar(PRESET_REGISTER_AVATARS[0]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,24 +302,69 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             /* REGISTER FORM (40+ Enforced) */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               
-              {/* Avatar Selector */}
-              <div>
-                <label className="block text-xs font-bold text-warm-700 mb-1.5">
-                  प्रोफ़ाइल फ़ोटो चुनें:
-                </label>
-                <div className="flex items-center gap-3">
-                  {PRESET_REGISTER_AVATARS.map((url, idx) => (
+              {/* Photo Upload Section: Device Upload + Preset Avatars */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-warm-800">
+                    प्रोफ़ाइल फ़ोटो (Profile Photo):
+                  </label>
+                  {customAvatarUploaded && (
+                    <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.2 rounded-full flex items-center gap-1">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                      <span>आपकी फ़ोटो चुनी गई</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+
+                {/* Device Upload Button Card */}
+                <div className="bg-warm-50 border-2 border-dashed border-warm-300 hover:border-brand-500 rounded-2xl p-2.5 flex items-center justify-between gap-2.5 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-100 flex items-center justify-center shrink-0 border border-brand-300">
+                      {customAvatarUploaded ? (
+                        <img src={regAvatar} alt="Custom" className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera className="w-5 h-5 text-brand-700" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-xs text-warm-900">
+                        {customAvatarUploaded ? 'डिवाइस से फ़ोटो अपलोड की गई' : 'गैलरी / डिवाइस से फ़ोटो लगाएं'}
+                      </p>
+                      <p className="text-[10px] text-warm-500">
+                        {customAvatarUploaded ? 'सफलतापूर्वक चुनी गई ✓' : 'फ़ोन या कंप्यूटर से फ़ोटो अपलोड करें'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
-                      key={idx}
                       type="button"
-                      onClick={() => setRegAvatar(url)}
-                      className={`relative rounded-full overflow-hidden border-3 transition-all ${
-                        regAvatar === url ? 'border-brand-600 scale-105 shadow-md' : 'border-transparent opacity-60'
-                      }`}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-brand-800 hover:bg-brand-900 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
                     >
-                      <img src={url} alt="preset" className="w-12 h-12 object-cover" />
+                      <Upload className="w-3 h-3" />
+                      <span>{customAvatarUploaded ? 'बदलें' : 'फ़ोटो चुनें'}</span>
                     </button>
-                  ))}
+                    {customAvatarUploaded && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveCustomAvatar}
+                        className="p-1.5 hover:bg-rose-100 text-rose-600 rounded-xl transition-colors"
+                        title="हटाएं"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -337,17 +412,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               {/* Mobile / Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-xs font-extrabold text-warm-800 mb-1">
+                  <label className="block text-xs font-extrabold text-warm-800 mb-1 font-devanagari">
                     मोबाइल नंबर *
                   </label>
-                  <input
-                    type="tel"
-                    required
-                    value={regMobile}
-                    onChange={(e) => setRegMobile(e.target.value)}
-                    placeholder="+91 98765 00000"
-                    className="w-full px-3 py-2.5 bg-warm-50 border border-warm-300 rounded-2xl text-sm"
-                  />
+                  <div className="flex rounded-2xl border border-warm-300 bg-warm-50 focus-within:bg-white focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-200 overflow-hidden transition-all">
+                    <span className="inline-flex items-center px-2.5 bg-warm-200/80 border-r border-warm-300 text-warm-900 font-extrabold text-xs select-none gap-1 shrink-0">
+                      <span>🇮🇳</span>
+                      <span>+91</span>
+                    </span>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={10}
+                      value={regMobile}
+                      onChange={(e) => setRegMobile(e.target.value.replace(/\D/g, ''))}
+                      placeholder="98765 00000"
+                      className="w-full px-2.5 py-2 bg-transparent border-0 text-sm font-bold text-warm-950 focus:outline-none focus:ring-0"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-extrabold text-warm-800 mb-1">

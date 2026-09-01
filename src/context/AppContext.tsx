@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Post,
@@ -25,6 +25,20 @@ import {
 } from '../data/mockData';
 import { useAuth } from './AuthContext';
 import { useAccessibility } from './AccessibilityContext';
+import { postApi } from '../services/postApi';
+import { familyApi } from '../services/familyApi';
+import { communityApi } from '../services/communityApi';
+import { messageApi } from '../services/messageApi';
+import { notificationApi } from '../services/notificationApi';
+import { socketService } from '../services/socketService';
+import {
+  mapBackendPostToFrontend,
+  mapBackendFamilyToFrontend,
+  mapBackendCommunityToFrontend,
+  mapBackendConversationToFrontend,
+  mapBackendMessageToFrontend,
+  mapBackendNotificationToFrontend,
+} from '../utils/mappers';
 
 export interface ActiveCallState {
   isOpen: boolean;
@@ -54,11 +68,11 @@ interface AppContextType {
     location?: string;
     audience: PostAudience;
     communityId?: string;
-  }) => void;
-  toggleLikePost: (postId: string) => void;
+  }) => Promise<void>;
+  toggleLikePost: (postId: string) => Promise<void>;
   toggleSavePost: (postId: string) => void;
   getCommentsForPost: (postId: string) => Comment[];
-  addComment: (postId: string, text: string, audioUrl?: string, audioDuration?: number) => void;
+  addComment: (postId: string, text: string, audioUrl?: string, audioDuration?: number) => Promise<void>;
   
   // Family
   familyMembers: FamilyMember[];
@@ -69,19 +83,19 @@ interface AppContextType {
     mobile: string;
     location: string;
     avatar?: string;
-  }) => void;
-  removeFamilyMember: (id: string) => void;
+  }) => Promise<void>;
+  removeFamilyMember: (id: string) => Promise<void>;
   
   // Communities
   communities: Community[];
-  toggleJoinCommunity: (communityId: string) => void;
+  toggleJoinCommunity: (communityId: string) => Promise<void>;
   
   // Messaging
   conversations: Conversation[];
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
   getMessagesForConversation: (convId: string) => Message[];
-  sendMessage: (convId: string, text?: string, audioUrl?: string, audioDuration?: number, imageUrl?: string) => void;
+  sendMessage: (convId: string, text?: string, audioUrl?: string, audioDuration?: number, imageUrl?: string) => Promise<void>;
   
   // Calling
   activeCall: ActiveCallState | null;
@@ -94,8 +108,8 @@ interface AppContextType {
   // Notifications & Celebrations
   notifications: NotificationItem[];
   unreadNotifCount: number;
-  markNotifAsRead: (id: string) => void;
-  markAllNotifsAsRead: () => void;
+  markNotifAsRead: (id: string) => Promise<void>;
+  markAllNotifsAsRead: () => Promise<void>;
   birthdays: BirthdayReminder[];
   sendBirthdayGreeting: (birthdayItem: BirthdayReminder, customMessage?: string) => void;
   
@@ -172,6 +186,120 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Call state
   const [activeCall, setActiveCall] = useState<ActiveCallState | null>(null);
 
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  }, []);
+
+  // Sync Backend Data when Current User Changes
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // 1. Fetch Feed from Backend
+    postApi.getFeed().then((res) => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped = res.data.map((p) => mapBackendPostToFrontend(p, currentUser.id));
+        setPosts((prev) => {
+          // Merge backend posts with any local custom posts not yet on server
+          const backendIds = new Set(mapped.map((m) => m.id));
+          const localOnly = prev.filter((p) => !backendIds.has(p.id) && p.id.startsWith('post-'));
+          return [...mapped, ...localOnly];
+        });
+      }
+    }).catch(() => {});
+
+    // 2. Fetch Family Members
+    familyApi.getMembers().then((res) => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped = res.data.map(mapBackendFamilyToFrontend);
+        setFamilyMembers(mapped);
+      }
+    }).catch(() => {});
+
+    // 3. Fetch Communities
+    communityApi.getCommunities().then((res) => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped = res.data.map((c) => mapBackendCommunityToFrontend(c, currentUser.id));
+        setCommunities(mapped);
+      }
+    }).catch(() => {});
+
+    // 4. Fetch Conversations
+    messageApi.getConversations().then((res) => {
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const mapped = res.data.map((c) => mapBackendConversationToFrontend(c, currentUser.id));
+        setConversations(mapped);
+      }
+    }).catch(() => {});
+
+    // 5. Fetch Notifications
+    notificationApi.getNotifications().then((res) => {
+      if (res.success && res.data?.notifications && res.data.notifications.length > 0) {
+        const mapped = res.data.notifications.map(mapBackendNotificationToFrontend);
+        setNotifications(mapped);
+      }
+    }).catch(() => {});
+
+    // 6. Register Real-Time WebSocket Handlers
+    const unbindMsg = socketService.on('new_message', (rawMsg: any) => {
+      playSuccessSound();
+      const mappedMsg = mapBackendMessageToFrontend(rawMsg);
+      const convId = mappedMsg.conversationId || rawMsg.conversationId;
+
+      setMessagesMap((prev) => ({
+        ...prev,
+        [convId]: [...(prev[convId] || []), mappedMsg],
+      }));
+
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === convId
+            ? {
+                ...c,
+                lastMessage: mappedMsg.text || '📷 मीडिया संदेश',
+                lastMessageTime: 'अभी',
+                unreadCount: c.unreadCount + 1,
+              }
+            : c
+        )
+      );
+
+      showToast(`नया संदेश: ${mappedMsg.text?.slice(0, 30) || 'मीडिया'}`);
+    });
+
+    const unbindNotif = socketService.on('notification', (rawNotif: any) => {
+      playSuccessSound();
+      const mappedNotif = mapBackendNotificationToFrontend(rawNotif);
+      setNotifications((prev) => [mappedNotif, ...prev]);
+      showToast(`🔔 ${mappedNotif.title}`);
+    });
+
+    const unbindCall = socketService.on('call:incoming', (callData: any) => {
+      playSuccessSound();
+      setActiveCall({
+        isOpen: true,
+        type: callData.callType || 'audio',
+        participantName: callData.callerName || 'प्रियजन',
+        participantAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400',
+        participantRelation: 'कॉल आ रही है...',
+        isConnecting: false,
+        isConnected: true,
+        isMuted: false,
+        isVideoOff: false,
+        isSpeakerOn: true,
+        durationSeconds: 0,
+      });
+    });
+
+    return () => {
+      unbindMsg();
+      unbindNotif();
+      unbindCall();
+    };
+  }, [currentUser, playSuccessSound, showToast]);
+
   // Save to localStorage
   useEffect(() => {
     localStorage.setItem('apnose_posts', JSON.stringify(posts));
@@ -212,13 +340,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(timer);
   }, [activeCall?.isConnected]);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4000);
-  };
-
   const setActiveTab = (tab: ActiveTab) => {
     playClickSound();
     setActiveTabState(tab);
@@ -226,7 +347,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Post methods
-  const createPost = (postData: {
+  const createPost = async (postData: {
     text: string;
     images?: string[];
     audioUrl?: string;
@@ -246,8 +367,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (comm) communityName = comm.nameHi;
     }
 
+    const tempId = `post-${Date.now()}`;
     const newPost: Post = {
-      id: `post-${Date.now()}`,
+      id: tempId,
       authorId: currentUser.id,
       authorName: currentUser.name.split(' (')[0],
       authorAvatar: currentUser.avatar,
@@ -272,25 +394,74 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       communityName,
     };
 
+    // Optimistically update UI
     setPosts((prev) => [newPost, ...prev]);
     showToast('आपकी पोस्ट सफलतापूर्वक साझा कर दी गई है! 🌸');
+
+    // Sync with backend API
+    try {
+      const mediaPayload = postData.images && postData.images.length > 0
+        ? postData.images
+        : postData.audioUrl
+        ? [postData.audioUrl]
+        : [];
+
+      const visibilityMap: Record<PostAudience, 'public' | 'friends' | 'family' | 'private'> = {
+        everyone: 'public',
+        friends: 'friends',
+        family: 'family',
+        only_me: 'private',
+      };
+
+      const res = await postApi.createPost({
+        content: postData.text,
+        media: mediaPayload,
+        mediaType: postData.audioUrl ? 'audio' : postData.images?.length ? 'image' : 'text',
+        visibility: visibilityMap[postData.audience] || 'public',
+        location: postData.location || currentUser.location.split(' (')[0],
+        feeling: postData.feeling?.textHi,
+      });
+
+      if (res.success && res.data) {
+        const backendPost = mapBackendPostToFrontend(res.data, currentUser.id);
+        setPosts((prev) => prev.map((p) => (p.id === tempId ? backendPost : p)));
+      }
+    } catch {
+      // Keep optimistic local post
+    }
   };
 
-  const toggleLikePost = (postId: string) => {
+  const toggleLikePost = async (postId: string) => {
     playClickSound();
+    const targetPost = posts.find((p) => p.id === postId);
+    if (!targetPost) return;
+
+    const willLike = !targetPost.likedByMe;
+
+    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
-          const liked = !p.likedByMe;
           return {
             ...p,
-            likedByMe: liked,
-            likesCount: liked ? p.likesCount + 1 : Math.max(0, p.likesCount - 1),
+            likedByMe: willLike,
+            likesCount: willLike ? p.likesCount + 1 : Math.max(0, p.likesCount - 1),
           };
         }
         return p;
       })
     );
+
+    // Call Backend API
+    try {
+      if (willLike) {
+        await postApi.likePost(postId);
+      } else {
+        await postApi.unlikePost(postId);
+      }
+    } catch {
+      // Optimistic state remains smooth
+    }
   };
 
   const toggleSavePost = (postId: string) => {
@@ -311,7 +482,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return commentsMap[postId] || [];
   };
 
-  const addComment = (postId: string, text: string, audioUrl?: string, audioDuration?: number) => {
+  const addComment = async (postId: string, text: string, audioUrl?: string, audioDuration?: number) => {
     if (!currentUser || (!text.trim() && !audioUrl)) return;
     playSuccessSound();
 
@@ -340,10 +511,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     showToast('आपकी टिप्पणी जुड़ गई है। 🙏');
+
+    // Call Backend API
+    try {
+      await postApi.addComment(postId, text);
+    } catch {
+      // Keep optimistic comment
+    }
   };
 
   // Family
-  const addFamilyMember = (member: {
+  const addFamilyMember = async (member: {
     name: string;
     relationship: RelationshipType;
     relationshipLabelHi: string;
@@ -352,8 +530,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     avatar?: string;
   }) => {
     playSuccessSound();
+    const tempId = `fam-${Date.now()}`;
     const newMember: FamilyMember = {
-      id: `fam-${Date.now()}`,
+      id: tempId,
       userId: `user-${Date.now()}`,
       name: member.name,
       relationship: member.relationship,
@@ -368,16 +547,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setFamilyMembers((prev) => [newMember, ...prev]);
     showToast(`${member.name} (${member.relationshipLabelHi}) को परिवार में जोड़ दिया गया है! 👨‍👩‍👧`);
+
+    try {
+      const res = await familyApi.addMember({
+        memberId: newMember.userId,
+        relationship: member.relationship,
+        customRelationName: member.relationshipLabelHi,
+      });
+      if (res.success && res.data) {
+        const mapped = mapBackendFamilyToFrontend(res.data);
+        setFamilyMembers((prev) => prev.map((m) => (m.id === tempId ? mapped : m)));
+      }
+    } catch {
+      // Keep optimistic member
+    }
   };
 
-  const removeFamilyMember = (id: string) => {
+  const removeFamilyMember = async (id: string) => {
     setFamilyMembers((prev) => prev.filter((m) => m.id !== id));
     showToast('सदस्य को सूची से हटा दिया गया है।');
+
+    try {
+      await familyApi.removeMember(id);
+    } catch {
+      // Local state already updated
+    }
   };
 
   // Communities
-  const toggleJoinCommunity = (communityId: string) => {
+  const toggleJoinCommunity = async (communityId: string) => {
     playClickSound();
+    const comm = communities.find((c) => c.id === communityId);
+    const willJoin = !comm?.isMember;
+
     setCommunities((prev) =>
       prev.map((c) => {
         if (c.id === communityId) {
@@ -392,6 +594,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return c;
       })
     );
+
+    try {
+      if (willJoin) {
+        await communityApi.joinCommunity(communityId);
+      } else {
+        await communityApi.leaveCommunity(communityId);
+      }
+    } catch {
+      // Optimistic update retained
+    }
   };
 
   // Messaging
@@ -399,7 +611,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return messagesMap[convId] || [];
   };
 
-  const sendMessage = (
+  const sendMessage = async (
     convId: string,
     text?: string,
     audioUrl?: string,
@@ -429,7 +641,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       [convId]: [...(prev[convId] || []), newMsg],
     }));
 
-    // Update conversation last message
+    // Update conversation preview
     const preview = audioUrl ? '🎤 [वॉइस संदेश]' : imageUrl ? '📷 [फोटो]' : text || '';
     setConversations((prev) =>
       prev.map((c) =>
@@ -443,7 +655,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
-    // Realistic auto-reply simulation after 2 seconds to make the app feel 100% alive
+    // Call Backend API
+    try {
+      await messageApi.sendMessage(convId, {
+        content: text?.trim(),
+        type: audioUrl ? 'voice' : imageUrl ? 'image' : 'text',
+        mediaUrl: audioUrl || imageUrl,
+      });
+    } catch {
+      // Backend unavailable, optimistic message preserved
+    }
+
+    // Interactive auto-reply simulation when testing locally
     setTimeout(() => {
       const replies = [
         'जी बहुत बढ़िया! मैं थोड़ी देर में कॉल करता हूँ। 🙏',
@@ -499,6 +722,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       durationSeconds: 0,
     });
 
+    // Notify backend/socket
+    socketService.initiateCall('recipient-user-id', { type }, type);
+
     // Simulate connecting after 1.5 seconds
     setTimeout(() => {
       setActiveCall((prev) => (prev ? { ...prev, isConnecting: false, isConnected: true } : null));
@@ -509,6 +735,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     playClickSound();
     if (activeCall) {
       showToast(`कॉल समाप्त हुई (${Math.floor(activeCall.durationSeconds / 60)} मिनट ${activeCall.durationSeconds % 60} सेकंड)`);
+      socketService.endCall('recipient-user-id');
     }
     setActiveCall(null);
   };
@@ -528,13 +755,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Notifications
   const unreadNotifCount = notifications.filter((n) => !n.isRead).length;
 
-  const markNotifAsRead = (id: string) => {
+  const markNotifAsRead = async (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+    try {
+      await notificationApi.markAsRead(id);
+    } catch {
+      // Local state preserved
+    }
   };
 
-  const markAllNotifsAsRead = () => {
+  const markAllNotifsAsRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     showToast('सभी सूचनाएं पढ़ी हुई चिह्नित कर दी गईं।');
+    try {
+      await notificationApi.markAllAsRead();
+    } catch {
+      // Local state preserved
+    }
   };
 
   // Birthday & Celebrations

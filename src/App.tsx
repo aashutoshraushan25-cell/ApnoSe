@@ -25,6 +25,7 @@ import { NotificationsPage } from './components/notifications/NotificationsPage'
 import { ProfilePage } from './components/profile/ProfilePage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { LandingPage } from './components/auth/LandingPage';
+import { LoginPage } from './components/auth/LoginPage';
 import { Toast } from './components/common/Toast';
 import { Sparkles, Heart } from 'lucide-react';
 
@@ -32,10 +33,14 @@ export const MainAppContent: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { activeTab, posts, searchQuery } = useApp();
   const [feedFilter, setFeedFilter] = useState<FeedFilterType>('all');
+  const [unauthView, setUnauthView] = useState<'login' | 'landing'>('login');
 
-  // If user is not authenticated, display the Landing Page!
+  // If user is not authenticated, display the dedicated Login Page first!
   if (!isAuthenticated) {
-    return <LandingPage />;
+    if (unauthView === 'landing') {
+      return <LandingPage onOpenLogin={() => setUnauthView('login')} />;
+    }
+    return <LoginPage onExploreLanding={() => setUnauthView('landing')} />;
   }
 
   // Filter posts based on tab & search query

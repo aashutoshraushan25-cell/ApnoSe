@@ -16,6 +16,7 @@ import {
   Check,
   Sparkles,
 } from 'lucide-react';
+import { ZeroKnowledgeEncryptionCard } from '../safety/ZeroKnowledgeEncryptionCard';
 
 export const SettingsPage: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -209,7 +210,10 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 4. Privacy & Safety Shortcut */}
+      {/* 4. Zero-Knowledge Encryption Controls */}
+      <ZeroKnowledgeEncryptionCard />
+
+      {/* 5. Privacy & Safety Shortcut */}
       <div className="bg-white rounded-3xl p-6 shadow-soft border border-warm-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700">

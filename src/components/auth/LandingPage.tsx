@@ -18,7 +18,11 @@ import {
   Star,
 } from 'lucide-react';
 
-export const LandingPage: React.FC = () => {
+interface LandingPageProps {
+  onOpenLogin?: () => void;
+}
+
+export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin }) => {
   const { t } = useLanguage();
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register' | null>(null);
 
@@ -139,13 +143,13 @@ export const LandingPage: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setAuthModalMode('login')}
+            onClick={() => onOpenLogin ? onOpenLogin() : setAuthModalMode('login')}
             className="px-5 py-2.5 rounded-2xl font-bold text-warm-800 hover:text-brand-900 hover:bg-white text-base transition-colors"
           >
             लॉग इन (Login)
           </button>
           <button
-            onClick={() => setAuthModalMode('register')}
+            onClick={() => onOpenLogin ? onOpenLogin() : setAuthModalMode('register')}
             className="px-6 py-2.5 bg-brand-800 hover:bg-brand-900 active:scale-95 text-white font-extrabold text-base rounded-2xl shadow-soft transition-all"
           >
             खाता बनाएं (40+)

@@ -15,6 +15,8 @@ import {
   HelpCircle,
   Sparkles,
 } from 'lucide-react';
+import { apiClient } from '../../services/apiClient';
+import { ZeroKnowledgeEncryptionCard } from './ZeroKnowledgeEncryptionCard';
 
 export const SafetyCenterPage: React.FC = () => {
   const { t } = useLanguage();
@@ -28,7 +30,7 @@ export const SafetyCenterPage: React.FC = () => {
   const [privacyFamilyOnly, setPrivacyFamilyOnly] = useState(true);
   const [strangerCallsBlocked, setStrangerCallsBlocked] = useState(true);
   const [reportAccountName, setReportAccountName] = useState('');
-  const [reportReason, setReportReason] = useState('');
+  const [reportReason, setReportReason] = useState('scam');
   const [isReportOpen, setIsReportOpen] = useState(false);
 
   const handleUnblock = (id: string, name: string) => {
@@ -36,13 +38,27 @@ export const SafetyCenterPage: React.FC = () => {
     showToast(`${name} को अनब्लॉक कर दिया गया है।`);
   };
 
-  const handleSendReport = (e: React.FormEvent) => {
+  const handleSendReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reportAccountName.trim()) return;
+
     showToast(`आपकी रिपोर्ट दर्ज कर ली गई है। हमारी सुरक्षा टीम 24 घंटे में जांच करेगी। 🛡️`);
+    const accName = reportAccountName.trim();
+    const reasonVal = reportReason;
+
     setReportAccountName('');
-    setReportReason('');
+    setReportReason('scam');
     setIsReportOpen(false);
+
+    try {
+      await apiClient.post('/reports', {
+        targetType: 'user',
+        description: `Reported Account: ${accName} | Reason: ${reasonVal}`,
+        reason: reasonVal === 'scam' ? 'scam' : 'harassment',
+      });
+    } catch {
+      // Handled gracefully
+    }
   };
 
   const handleTriggerSOS = () => {
@@ -67,6 +83,9 @@ export const SafetyCenterPage: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* ZERO-KNOWLEDGE CLIENT-SIDE ENCRYPTION CARD */}
+      <ZeroKnowledgeEncryptionCard />
 
       {/* Critical Scam Warnings Banners */}
       <div className="space-y-3">

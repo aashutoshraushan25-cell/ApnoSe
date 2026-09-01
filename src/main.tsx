@@ -4,6 +4,7 @@ import { MainAppContent } from './App';
 import { LanguageProvider } from './context/LanguageContext';
 import { AccessibilityProvider } from './context/AccessibilityContext';
 import { AuthProvider } from './context/AuthContext';
+import { EncryptionProvider } from './context/EncryptionContext';
 import { AppProvider } from './context/AppContext';
 import './index.css';
 
@@ -12,9 +13,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <LanguageProvider>
       <AccessibilityProvider>
         <AuthProvider>
-          <AppProvider>
-            <MainAppContent />
-          </AppProvider>
+          <EncryptionProvider>
+            <AppProvider>
+              <MainAppContent />
+            </AppProvider>
+          </EncryptionProvider>
         </AuthProvider>
       </AccessibilityProvider>
     </LanguageProvider>
